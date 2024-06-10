@@ -1,7 +1,9 @@
-function forms() {
-    // Forms
+import {closeModal, openModal} from "./modal";
+import {postData} from "../services/services";
 
-    const forms = document.querySelectorAll('form');
+function forms(formSelector, modalTimerId) {
+
+    const forms = document.querySelectorAll(formSelector);
 
     const message = {
         loading: 'img/form/spinner.svg',
@@ -13,17 +15,8 @@ function forms() {
         bindPostData(item);
     });
 
-    const postData = async (url, data) => {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: data
-        });
-
-        return await res.json();
-    };
+    
+    
 
     function bindPostData(form) {
         form.addEventListener('submit', (e) => {
@@ -37,39 +30,10 @@ function forms() {
             `;
             form.insertAdjacentElement('afterend', statusMessage);
 
-            /* const request = new XMLHttpRequest();
-            request.open('POST', 'server.php'); старый метод, используем уже фэтч */
-
-            
-
-            // обычный запрос:
-            /* request.setRequestHeader('Content-type', 'multipart/form-data');
-            
-            const formData = new FormData(form);
-
-            request.send(formData); */
-
-            // JSON:
-            /* request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); */
             const formData = new FormData(form);
 
             const json = JSON.stringify(Object.fromEntries(formData.entries()));
-            /* object = {};
-            formData.forEach(function(value, key) {
-                object[key] = value;
-            }); */
-
-            /* request.send(json); */
-
-           /*  fetch('server.php', {
-                method: "POST",
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            }) */
             postData('http://localhost:3000/requests', json)
-            /* .then(data => data.text()) */ //чтобы ответ приходил в понятной нам форме
             .then(data => {
                 console.log(data);
                 showThanksModal(message.success);
@@ -79,29 +43,15 @@ function forms() {
             }).finally(() => {
                 form.reset();
             })
-
-// действия после ответа от сервера
-
-            /* request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(message.success);
-                    form.reset();
-                    statusMessage.remove();
-                } else {
-                    showThanksModal(message.failure);
-                }
-            }); */
         });
     }
 
-    //Красивое оформление
 
     function showThanksModal(message) {
         const prevModalDialog = document.querySelector('.modal__dialog');
 
         prevModalDialog.classList.add('hide');
-        openModal();
+        openModal('.modal', modalTimerId);
 
         const thanksModal = document.createElement('div');
         thanksModal.classList.add('modal__dialog');
@@ -117,7 +67,7 @@ function forms() {
             thanksModal.remove();
             prevModalDialog.classList.add('show');
             prevModalDialog.classList.remove('hide');
-            closeModal();
+            closeModal('.modal');
         }, 4000);
     }
 
@@ -126,4 +76,4 @@ function forms() {
         .then(res => console.log(res));
 
 }
-module.exports = forms;
+export default forms;
